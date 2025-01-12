@@ -1,0 +1,32 @@
+model ModelName
+uses "mmxprs","mmsystem"; !gain access to the Xpress-Optimizer solver
+
+setparam("XPRS_VERBOSE", true)
+
+! data and variables definition
+declarations
+	ROWS, COLS: set of integer
+	Matrix: array(ROWS,COLS) of integer
+	x:array(ROWS) of mpvar
+end-declarations
+
+initializations from "matlab.mws:"
+	Matrix as "M"
+end-initializations
+
+forall (i in ROWS) x(i) is_binary
+
+forall (j in COLS) do
+	sum (i in ROWS) Matrix(i,j)*x(i) >= 1
+end-do
+
+minimize(sum(i in ROWS) x(i)) 
+
+initializations to "matlab.mws:"
+  evaluation of getobjval as "objval"
+  evaluation of array(i in ROWS) x(i).sol as "x"
+end-initializations
+
+exit(getprobstat)
+
+end-model
